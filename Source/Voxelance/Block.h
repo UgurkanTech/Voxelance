@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Block.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FBlock
 {
@@ -14,6 +15,8 @@ public:
         int id;
     UPROPERTY(BlueprintReadWrite)
         int meta;
+    UPROPERTY(BlueprintReadWrite)
+        bool isOpaque;
 };
 
 USTRUCT(BlueprintType)
