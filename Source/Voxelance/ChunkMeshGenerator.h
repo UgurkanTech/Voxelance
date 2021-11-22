@@ -18,7 +18,7 @@ class VOXELANCE_API UChunkMeshGenerator : public UBlueprintAsyncActionBase
 public:
 	UChunkMeshGenerator();
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Generate Chunk Mesh", Keywords = "Chunk Mesh Generator"))
-		static void Execute(FBlock3D blocks3d, const int triSize, const FBlockLib blockLib, TArray<FVector>& vertices, TArray<int>& triangles);
+		static void Execute(FBlock3D blocks3d, const int triSize, const FVector2D tileSize, FBlockLib blockLib, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs);
 	static void CalculateTrisVerts(FVector pos, const int triSize, TArray<FVector>& verts, TArray<int>& tris, TArray<FVector> faceMeshVerts, TArray<int> faceMeshTris);
 
 	static TArray<FVector> meshFaces[6];

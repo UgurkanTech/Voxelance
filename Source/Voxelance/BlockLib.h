@@ -11,7 +11,7 @@ struct FBlockLib
 {
     GENERATED_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
          TArray<FBlockMeta> blocks;
     FBlockLib();
 };

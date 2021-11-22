@@ -94,10 +94,11 @@ void UChunkMeshGenerator::CalculateTrisVerts(FVector pos, const int triSize, TAr
 
 }
 
-void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FBlockLib blockLib, TArray<FVector>& vertices, TArray<int>& triangles)
+void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FVector2D tileSize, FBlockLib blockLib, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs)
 {    
     FVector tempPos;
-    int facesTemp[6];
+    int uvID = 0;
+    FVector2D pos;
 
     for (int32 i = 0; i != blocks3d.blocks.Num(); ++i)
     {
@@ -147,22 +148,54 @@ void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FB
                              blocks3d.blocks[0].blocks.IsValidIndex(tempPos.Y) &&
                              blocks3d.blocks[0].blocks[0].blocks.IsValidIndex(tempPos.Z))
                          {
-                             if (!blocks3d.blocks[i].blocks[j].blocks[k].isOpaque)
-                                 facesTemp[a] = a + 1;
+                             if (!blocks3d.blocks[tempPos.X].blocks[tempPos.Y].blocks[tempPos.Z].isOpaque){
+
+
+                                 for (size_t c = 0; c < 4; c++) //For verts
+                                 {
+                                     vertices.Add((FVector(i, j, k) * 100) + (meshFaces[a][c] * triSize));
+                                 }
+                                 for (size_t c = 0; c < 6; c++) //For tris
+                                 {
+                                     triangles.Add(meshTris[a][c] + vertices.Num() - 4);
+                                 }
+
+                                 uvID = blockLib.blocks[blocks3d.blocks[i].blocks[j].blocks[k].id].uvIds[a];
+                                 pos = FVector2D(uvID % (int)tileSize.X, uvID / (int)tileSize.X) / tileSize;
+
+                                 uvs.Add(FVector2D(0, 0) / tileSize + pos);
+                                 uvs.Add(FVector2D(1, 0) / tileSize + pos);
+                                 uvs.Add(FVector2D(0, 1) / tileSize + pos);
+                                 uvs.Add(FVector2D(1, 1) / tileSize + pos);
+
+
+                             }
+                                 
                          }
-                         else
-                             facesTemp[a] = a + 1;
+                         else {
 
-                     }
-                     //End of calculating faces
-                     //Calculate Tris and Verts
-                     
-                     for (size_t b = 0; b < 6; b++)
-                     {
-                         if (facesTemp[b] == 0) continue;
-                         CalculateTrisVerts(FVector(i,j,k), triSize, vertices, triangles, meshFaces[facesTemp[b] - 1], meshTris[facesTemp[b] - 1]);
-                     }
 
+                             for (size_t c = 0; c < 4; c++) //For verts
+                             {
+                                 vertices.Add((FVector(i, j, k) * 100) + (meshFaces[a][c] * triSize));
+                             }
+                             for (size_t c = 0; c < 6; c++) //For tris
+                             {
+                                 triangles.Add(meshTris[a][c] + vertices.Num() - 4);
+                             }
+
+                             uvID = blockLib.blocks[blocks3d.blocks[i].blocks[j].blocks[k].id].uvIds[a];
+                             pos = FVector2D(uvID % (int)tileSize.X, uvID / (int)tileSize.X) / tileSize;
+
+                             uvs.Add(FVector2D(0, 0) / tileSize + pos);
+                             uvs.Add(FVector2D(1, 0) / tileSize + pos);
+                             uvs.Add(FVector2D(0, 1) / tileSize + pos);
+                             uvs.Add(FVector2D(1, 1) / tileSize + pos);
+
+
+
+                         }
+                     }
                  }
              }
          }
