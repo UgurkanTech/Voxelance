@@ -94,11 +94,12 @@ void UChunkMeshGenerator::CalculateTrisVerts(FVector pos, const int triSize, TAr
 
 }
 
-void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FVector2D tileSize, FBlockLib blockLib, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs)
+void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FVector2D tileSize, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs)
 {    
     FVector tempPos;
     int uvID = 0;
     FVector2D pos;
+    FBlockLib blockLib;
 
     for (int32 i = 0; i != blocks3d.blocks.Num(); ++i)
     {
