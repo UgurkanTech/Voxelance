@@ -2,40 +2,41 @@
 
 #include "ChunkMeshGenerator.h"
 
-TArray<FVector> UChunkMeshGenerator::meshFaces[6];
-TArray<int> UChunkMeshGenerator::meshTris[6];
+TArray<FVector> ChunkMeshGenerator::meshFaces[6];
+TArray<int> ChunkMeshGenerator::meshTris[6];
 
-UChunkMeshGenerator::UChunkMeshGenerator() {
+
+ChunkMeshGenerator::ChunkMeshGenerator() {
     //Top
-    meshFaces[0].Add(FVector(-1, 1, 1));
-    meshFaces[0].Add(FVector(1, 1, 1));
-    meshFaces[0].Add(FVector(-1, -1, 1));
-    meshFaces[0].Add(FVector(1, -1, 1));
+    meshFaces[0].Add(FVector(-1, 1, 1) * triangleSize);
+    meshFaces[0].Add(FVector(1, 1, 1) * triangleSize);
+    meshFaces[0].Add(FVector(-1, -1, 1) * triangleSize);
+    meshFaces[0].Add(FVector(1, -1, 1) * triangleSize);
     //Bottom
-    meshFaces[1].Add(FVector(-1, 1, -1));
-    meshFaces[1].Add(FVector(1, 1, -1));
-    meshFaces[1].Add(FVector(-1, -1, -1));
-    meshFaces[1].Add(FVector(1, -1, -1));
+    meshFaces[1].Add(FVector(-1, 1, -1) * triangleSize);
+    meshFaces[1].Add(FVector(1, 1, -1) * triangleSize);
+    meshFaces[1].Add(FVector(-1, -1, -1) * triangleSize);
+    meshFaces[1].Add(FVector(1, -1, -1) * triangleSize);
     //Back
-    meshFaces[2].Add(FVector(-1, 1, 1));
-    meshFaces[2].Add(FVector(-1, -1, 1));
-    meshFaces[2].Add(FVector(-1, 1, -1));
-    meshFaces[2].Add(FVector(-1, -1, -1));
+    meshFaces[2].Add(FVector(-1, 1, 1) * triangleSize);
+    meshFaces[2].Add(FVector(-1, -1, 1) * triangleSize);
+    meshFaces[2].Add(FVector(-1, 1, -1) * triangleSize);
+    meshFaces[2].Add(FVector(-1, -1, -1) * triangleSize);
     //Front
-    meshFaces[3].Add(FVector(1, 1, 1));
-    meshFaces[3].Add(FVector(1, -1, 1));
-    meshFaces[3].Add(FVector(1, 1, -1));
-    meshFaces[3].Add(FVector(1, -1, -1));
+    meshFaces[3].Add(FVector(1, 1, 1) * triangleSize);
+    meshFaces[3].Add(FVector(1, -1, 1) * triangleSize);
+    meshFaces[3].Add(FVector(1, 1, -1) * triangleSize);
+    meshFaces[3].Add(FVector(1, -1, -1) * triangleSize);
     //Left
-    meshFaces[4].Add(FVector(-1, -1, 1));
-    meshFaces[4].Add(FVector(1, -1, 1));
-    meshFaces[4].Add(FVector(-1, -1, -1));
-    meshFaces[4].Add(FVector(1, -1, -1));
+    meshFaces[4].Add(FVector(-1, -1, 1) * triangleSize);
+    meshFaces[4].Add(FVector(1, -1, 1) * triangleSize);
+    meshFaces[4].Add(FVector(-1, -1, -1) * triangleSize);
+    meshFaces[4].Add(FVector(1, -1, -1) * triangleSize);
     //Right
-    meshFaces[5].Add(FVector(-1, 1, 1));
-    meshFaces[5].Add(FVector(1, 1, 1));
-    meshFaces[5].Add(FVector(-1, 1, -1));
-    meshFaces[5].Add(FVector(1, 1, -1));
+    meshFaces[5].Add(FVector(-1, 1, 1) * triangleSize);
+    meshFaces[5].Add(FVector(1, 1, 1) * triangleSize);
+    meshFaces[5].Add(FVector(-1, 1, -1) * triangleSize);
+    meshFaces[5].Add(FVector(1, 1, -1) * triangleSize);
     //Top
     meshTris[0].Add(0);
     meshTris[0].Add(3);
@@ -78,128 +79,128 @@ UChunkMeshGenerator::UChunkMeshGenerator() {
     meshTris[5].Add(0);
     meshTris[5].Add(3);
     meshTris[5].Add(1);
-
 }
 
-void UChunkMeshGenerator::CalculateTrisVerts(FVector pos, const int triSize, TArray<FVector>& verts, TArray<int>& tris, TArray<FVector> faceMeshVerts, TArray<int> faceMeshTris) {
-    for (size_t i = 0; i < 4; i++) //For verts
-    {
-        verts.Add((pos * 100) + (faceMeshVerts[i] * triSize));
-    }
-    for (size_t i = 0; i < 6; i++) //For tris
-    {
-        tris.Add(faceMeshTris[i] + verts.Num() - 4);
-    }
-    //Add UVs
 
-}
 
-void UChunkMeshGenerator::Execute(FBlock3D blocks3d, const int triSize, const FVector2D tileSize, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs)
+
+void ChunkMeshGenerator::generateMesh(FBlock* blocks3d, TArray<FVector>& vertices, TArray<int>& triangles, TArray<FVector2D>& uvs)
 {    
     FVector tempPos;
     int uvID = 0;
     FVector2D pos;
     FBlockLib blockLib;
+    FVector2D uv0(0, 0);
+    FVector2D uv1(1 / tileSize, 0);
+    FVector2D uv2(0, 1 / tileSize);
+    FVector2D uv3(1 / tileSize, 1 / tileSize);
+    FVector tempVector;
+    size_t a;
 
-    for (int32 i = 0; i != blocks3d.blocks.Num(); ++i)
+
+    
+    for (size_t i = 0; i < blockCount; i++)
     {
-         for (int32 j = 0; j != blocks3d.blocks[i].blocks.Num(); ++j)
-         {
-             for (int32 k = 0; k != blocks3d.blocks[i].blocks[j].blocks.Num(); ++k)
-             {
-                 if (blocks3d.blocks[i].blocks[j].blocks[k].id != 0)
+                 if (blocks3d[i].id != 0)
                  {
                      //Calculate faces
-                     for (size_t a = 0; a < 6; a++)
+                     for (a = 0; a < 6; a++)
                      {
                          switch (a)
                          {
                          case 0:
-                             tempPos.X = i;
-                             tempPos.Y = j;
-                             tempPos.Z = k + 1;
+                             tempPos.X = i & xyMaxSub1;
+                             tempPos.Y = (i >> 4) & xyMaxSub1;
+                             tempPos.Z = (i >> 8) + 1;
                              break;
                          case 1:
-                             tempPos.X = i;
-                             tempPos.Y = j;
-                             tempPos.Z = k - 1;
+                             tempPos.X = i & xyMaxSub1;
+                             tempPos.Y = (i >> 4) & xyMaxSub1;
+                             tempPos.Z = (i >> 8) - 1;
                              break;
                          case 2:
-                             tempPos.X = i - 1;
-                             tempPos.Y = j;
-                             tempPos.Z = k;
+                             tempPos.X = (i & xyMaxSub1) - 1;
+                             tempPos.Y = (i >> 4) & xyMaxSub1;
+                             tempPos.Z = i >> 8;
                              break;
                          case 3:
-                             tempPos.X = i + 1;
-                             tempPos.Y = j;
-                             tempPos.Z = k;
+                             tempPos.X = (i & xyMaxSub1) + 1;
+                             tempPos.Y = (i >> 4) & xyMaxSub1;
+                             tempPos.Z = i >> 8;
                              break;
                          case 4:
-                             tempPos.X = i;
-                             tempPos.Y = j - 1;
-                             tempPos.Z = k;
+                             tempPos.X = i & xyMaxSub1;
+                             tempPos.Y = ((i >> 4) & xyMaxSub1) - 1;
+                             tempPos.Z = i >> 8;
                              break;
                          case 5:
-                             tempPos.X = i;
-                             tempPos.Y = j + 1;
-                             tempPos.Z = k;
+                             tempPos.X = i & xyMaxSub1;
+                             tempPos.Y = ((i >> 4) & xyMaxSub1) + 1;
+                             tempPos.Z = i >> 8;
                              break;
                          }
-                         if (blocks3d.blocks.IsValidIndex(tempPos.X) &&
-                             blocks3d.blocks[0].blocks.IsValidIndex(tempPos.Y) &&
-                             blocks3d.blocks[0].blocks[0].blocks.IsValidIndex(tempPos.Z))
+                         if (tempPos.X < xyMax && tempPos.X > -1 &&
+                             tempPos.Y < xyMax && tempPos.Y > -1 &&
+                             tempPos.Z < zMax && tempPos.Z > -1)
                          {
-                             if (!blocks3d.blocks[tempPos.X].blocks[tempPos.Y].blocks[tempPos.Z].isOpaque){
+                             
+                             if (!blocks3d[static_cast<int>((tempPos.Z * xyMax2) + (tempPos.Y * xyMax) + tempPos.X)].isOpaque){
 
 
-                                 for (size_t c = 0; c < 4; c++) //For verts
-                                 {
-                                     vertices.Add((FVector(i, j, k) * 100) + (meshFaces[a][c] * triSize));
-                                 }
-                                 for (size_t c = 0; c < 6; c++) //For tris
-                                 {
-                                     triangles.Add(meshTris[a][c] + vertices.Num() - 4);
-                                 }
+                                 tempVector = (FVector(i & xyMaxSub1, (i >> 4) & xyMaxSub1, i >> 8) * 100);
+                                 vertices.Add(tempVector + (meshFaces[a][0]));
+                                 vertices.Add(tempVector + (meshFaces[a][1]));
+                                 vertices.Add(tempVector + (meshFaces[a][2]));
+                                 vertices.Add(tempVector + (meshFaces[a][3]));
 
-                                 uvID = blockLib.blocks[blocks3d.blocks[i].blocks[j].blocks[k].id].uvIds[a];
-                                 pos = FVector2D(uvID % (int)tileSize.X, uvID / (int)tileSize.X) / tileSize;
+                                 triangles.Add(meshTris[a][0] + vertices.Num() - 4);
+                                 triangles.Add(meshTris[a][1] + vertices.Num() - 4);
+                                 triangles.Add(meshTris[a][2] + vertices.Num() - 4);
+                                 triangles.Add(meshTris[a][3] + vertices.Num() - 4);
+                                 triangles.Add(meshTris[a][4] + vertices.Num() - 4);
+                                 triangles.Add(meshTris[a][5] + vertices.Num() - 4);
 
-                                 uvs.Add(FVector2D(0, 0) / tileSize + pos);
-                                 uvs.Add(FVector2D(1, 0) / tileSize + pos);
-                                 uvs.Add(FVector2D(0, 1) / tileSize + pos);
-                                 uvs.Add(FVector2D(1, 1) / tileSize + pos);
+                                 uvID = blockLib.blocks[blocks3d[i].id].uvIds[a];
+                                 pos = FVector2D(uvID % (int)tileSize, uvID / (int)tileSize) / tileSize;
+
+                                 uvs.Add(uv0 + pos);
+                                 uvs.Add(uv1 + pos);
+                                 uvs.Add(uv2 + pos);
+                                 uvs.Add(uv3 + pos);
 
 
                              }
                                  
                          }
                          else {
+                             tempVector = (FVector(i & xyMaxSub1, (i >> 4) & xyMaxSub1, i >> 8) * 100);
+                             vertices.Add(tempVector + (meshFaces[a][0]));
+                             vertices.Add(tempVector + (meshFaces[a][1]));
+                             vertices.Add(tempVector + (meshFaces[a][2]));
+                             vertices.Add(tempVector + (meshFaces[a][3]));
+                             
+                             triangles.Add(meshTris[a][0] + vertices.Num() - 4);
+                             triangles.Add(meshTris[a][1] + vertices.Num() - 4);
+                             triangles.Add(meshTris[a][2] + vertices.Num() - 4);
+                             triangles.Add(meshTris[a][3] + vertices.Num() - 4);
+                             triangles.Add(meshTris[a][4] + vertices.Num() - 4);
+                             triangles.Add(meshTris[a][5] + vertices.Num() - 4);
+                             
 
+                             uvID = blockLib.blocks[blocks3d[i].id].uvIds[a];
+                             pos = FVector2D(uvID % (int)tileSize, uvID / (int)tileSize) / tileSize;
 
-                             for (size_t c = 0; c < 4; c++) //For verts
-                             {
-                                 vertices.Add((FVector(i, j, k) * 100) + (meshFaces[a][c] * triSize));
-                             }
-                             for (size_t c = 0; c < 6; c++) //For tris
-                             {
-                                 triangles.Add(meshTris[a][c] + vertices.Num() - 4);
-                             }
-
-                             uvID = blockLib.blocks[blocks3d.blocks[i].blocks[j].blocks[k].id].uvIds[a];
-                             pos = FVector2D(uvID % (int)tileSize.X, uvID / (int)tileSize.X) / tileSize;
-
-                             uvs.Add(FVector2D(0, 0) / tileSize + pos);
-                             uvs.Add(FVector2D(1, 0) / tileSize + pos);
-                             uvs.Add(FVector2D(0, 1) / tileSize + pos);
-                             uvs.Add(FVector2D(1, 1) / tileSize + pos);
+                             uvs.Add(uv0 + pos);
+                             uvs.Add(uv1 + pos);
+                             uvs.Add(uv2 + pos);
+                             uvs.Add(uv3 + pos);
 
 
 
                          }
                      }
                  }
-             }
-         }
+
     }
 }
 

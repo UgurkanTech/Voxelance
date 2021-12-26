@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Block.generated.h"
 
 
@@ -11,37 +12,15 @@ struct FBlock
 {
     GENERATED_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
-        int id;
-    UPROPERTY(BlueprintReadWrite)
-        int meta;
-    UPROPERTY(BlueprintReadWrite)
+    FBlock() {};
+    FBlock(uint8 id, uint8  meta, bool isOpaque) {
+        this->id = id;
+        this->meta = meta;
+        this->isOpaque = isOpaque;
+
+    };
+        uint8  id;
+        uint8  meta;
         bool isOpaque;
 };
 
-USTRUCT(BlueprintType)
-struct FBlock1D
-{
-    GENERATED_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite)
-        TArray<FBlock> blocks;
-};
-
-USTRUCT(BlueprintType)
-struct FBlock2D
-{
-    GENERATED_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite)
-        TArray<FBlock1D> blocks;
-};
-
-USTRUCT(BlueprintType)
-struct FBlock3D
-{
-    GENERATED_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite)
-        TArray<FBlock2D> blocks;
-};
