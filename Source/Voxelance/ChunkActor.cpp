@@ -78,10 +78,17 @@ void AChunkActor::Start(ChunkMeshGenerator* cmg, ChunkBlockGen* cbg) {
 	//UE_LOG(LogTemp, Error, TEXT("Chunkactor loc %.1f %.1f %.1f"), pos.X, pos.Y, pos.Z);
 	//uc->SetRelativeLocation(pos);
 	//ac->RegisterComponent();
+
+	cbg->noise.SetSeed(132);
+	
 	vertices.Empty();
 	triangles.Empty();
 	UVs.Empty();
-	cbg->noise.SetSeed(132);
+
+	vertices.Shrink();
+	triangles.Shrink();
+	UVs.Shrink();
+	
 	//cbg.noise.SetSeed(time(NULL));
 	
 	//cbg->generateBlocks(pos.X / triangleSize / 2, pos.Y / triangleSize / 2, pos.Z / triangleSize / 2, d3);
@@ -91,6 +98,7 @@ void AChunkActor::Start(ChunkMeshGenerator* cmg, ChunkBlockGen* cbg) {
 	//ThreadWorker tw;
 	//std::thread th(&ThreadWorker::threadFunction, cbg, pos, d3);
 	//th.join();
+	delete chunkWorker;
 	chunkWorker = new ChunkWorker(this, cbg, cmg);
 	//chunkWorker->Thread->WaitForCompletion();
 	//cbg->generateBlocks(pos.X / triangleSize / 2, pos.Y / triangleSize / 2, pos.Z / triangleSize / 2, d3);

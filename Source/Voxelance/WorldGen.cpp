@@ -13,7 +13,8 @@ AWorldGen::AWorldGen()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.bNoFail = true;
 
-	
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+	SetRootComponent(SceneComponent);
 }
 class UtilityTimer
 {
@@ -132,32 +133,39 @@ void AWorldGen::Tick(float DeltaTime)
 		{
 			if (!chunkContains(v))
 			{
-				chunks.Add(new FChunkBlock(v));
+				if(chunkPool.IsEmpty())
+					chunks.Add(new FChunkBlock(v));
+				else
+				{
+					chunkPool.Dequeue(cbtemp);
+					cbtemp->Pos = *v;
+					chunks.Add(cbtemp);
+				}
 			}
 		}
-		bool done = false;
+		done = false;
 		for (FChunkBlock* c : chunks)
 		{
 		
 			switch (c->State)
 			{
 			case Pooled:
+			case Deleted:
 				{
-					AChunkActor* ch;
-					if(chunkActorPool.IsEmpty())
+					
+					if(c->State == Pooled)
 						 ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), c->Pos, FRotator(0,0,0), SpawnParams);
 					else
 					{
-						chunkActorPool.Dequeue(ch);
+						ch = c->Actor;
 						ch->dirty = true;
 					}
-						
 					ch->pos = c->Pos;
 					ch->SetActorLocation(c->Pos);
 					c->Actor = ch;
 					ch->Start(&cmg, &cbg);
 					c->State = Dirty;
-					UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					//UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
 					done = true;
 				}
 				break;
@@ -171,7 +179,7 @@ void AWorldGen::Tick(float DeltaTime)
 				{
 					c->Actor->mesh->CreateMeshSection(0, c->Actor->vertices, c->Actor->triangles, TArray<FVector>(), c->Actor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 					c->State = Rendered;
-					UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					//UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
 					done = true;
 				}
 				break;
@@ -184,9 +192,9 @@ void AWorldGen::Tick(float DeltaTime)
 				{
 					c->Actor->mesh->ClearAllMeshSections();
 					c->State = Deleted;
-					chunkActorPool.Enqueue(c->Actor);
+					chunkPool.Enqueue(c);
 					chunks.Remove(c);
-					UE_LOG(LogTemp, Warning, TEXT("A chunk Deleted: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					//UE_LOG(LogTemp, Warning, TEXT("A chunk Deleted: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
 					done = true;
 				}
 				break;
@@ -199,6 +207,7 @@ void AWorldGen::Tick(float DeltaTime)
 		}
 		mutex.Unlock();
 	}
+	
 
 }
 

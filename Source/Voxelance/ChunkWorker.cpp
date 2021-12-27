@@ -35,28 +35,7 @@ bool ChunkWorker::Init()
 		// Return false if you want to abort the thread
 	return true;
 }
-class UtilityTimer
-{
-	int64 TickTime = 0;
-	int64 TockTime = 0;
-public:
-	int64 unixTimeNow()
-	{
-		FDateTime timeUtc = FDateTime::UtcNow();
-		return timeUtc.ToUnixTimestamp() * 1000 + timeUtc.GetMillisecond();
-	}
 
-	void tick()
-	{
-		TickTime = unixTimeNow();
-	}
-
-	int32 tock()
-	{
-		TockTime = unixTimeNow();
-		return TockTime - TickTime;
-	}
-};
 
 
 uint32 ChunkWorker::Run()
@@ -64,16 +43,19 @@ uint32 ChunkWorker::Run()
 	// Peform your processor intensive task here. In this example, a neverending
 	// task is created, which will only end when Stop is called.
 	//while (bRunThread){
-	srand(actor->id);
-	//UE_LOG(LogTemp, Warning, TEXT("id: %d"), rand() % 10);
-	UtilityTimer timer;
-	int32 t = 0;
-	timer.tick();
+	
+	//srand(actor->id);
+	//UtilityTimer timer;
+	//int32 t = 0;
+	//timer.tick();
+
 	cbg->generateBlocks(actor->pos.X / triangleSize / 2, actor->pos.Y / triangleSize / 2, actor->pos.Z / triangleSize / 2, actor->blocks);
 	cmg->generateMesh(actor->blocks, actor->vertices, actor->triangles, actor->UVs);
 	//FPlatformProcess::Sleep(rand() % 1000 / 100.0);
-	t = timer.tock();
+
+	//t = timer.tock();
 	//UE_LOG(LogTemp, Warning, TEXT("A chunk generated in: %d at pos: %.0f %.0f %.0f"), t, actor->pos.X, actor->pos.Y, actor->pos.Z);
+
 	actor->dirty = false;
 	//}
 

@@ -38,16 +38,21 @@ public:
 	FVector pos;
 	int id;
 	bool dirty;
+	UPROPERTY()
 	TArray<FVector> vertices;
+	UPROPERTY()
 	TArray<int32> triangles;
+	UPROPERTY()
 	TArray<FVector2D> UVs;
 	UPROPERTY()
 	UProceduralMeshComponent* mesh;
 	UPROPERTY()
 	UMaterial* StoredMaterial;
+	
 	ChunkWorker* chunkWorker;
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterialInst;
+	UPROPERTY()
 	FBlock blocks[blockCount];
 	
 	bool operator==(const AChunkActor& a) const

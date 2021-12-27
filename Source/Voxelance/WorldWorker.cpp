@@ -55,8 +55,13 @@ uint32 WorldWorker::Run()
 
 	APawn* pc = nullptr;
 	FVector loc(0,0,0);
+
+	int size = xyMax * triangleSize * 2;
+	int range = 7;
+	
 	while (bRunThread){
 		if (pc == nullptr) {
+			loc = worldgen->GetActorLocation();
 			pc = worldgen->GetWorld()->GetFirstPlayerController()->GetPawn();
 		}
 		else
@@ -64,12 +69,10 @@ uint32 WorldWorker::Run()
 			loc = pc->GetActorLocation();
 		}
 	
-
 		//UE_LOG(LogTemp, Warning, TEXT("Playerpos: %.1f %.1f %.1f"), loc.X, loc.Y, loc.Z);
 
 		//Find chunks
-		int size = 1600;
-		int range = 7;
+		
 		worldgen->chunksInRange.Reset(((range * 2) - 1) * ((range * 2) - 1));
 		worldgen->chunksInRange.Add(new FVector(size * ( ffloor(loc.X / size)), (ffloor(loc.Y / size)) * size, 0));
 		for (int r = 0; r < range; r++) {
@@ -95,8 +98,7 @@ uint32 WorldWorker::Run()
 			
 		}
 		
-		
-		FPlatformProcess::Sleep(0.25f);
+		FPlatformProcess::Sleep(0.33f);
 		
 	}
 

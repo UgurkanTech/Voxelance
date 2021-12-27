@@ -29,9 +29,10 @@ public:
 		void SpawnChunk();
 	
 	TArray<FChunkBlock*> chunks;
-	TQueue<AChunkActor*> chunkActorPool;
+	TQueue<FChunkBlock*> chunkPool;
 	TArray<FVector*> chunksInRange;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* SceneComponent;
 	bool chunkContains(FVector* v);
 	Mutex mutex;
 	WorldWorker* ww;
@@ -47,7 +48,9 @@ private:
 	UBlueprint* chunkBP;
 	UWorld* World;
 	FActorSpawnParameters SpawnParams;
-	
+	AChunkActor* ch;
+	bool done;
+	FChunkBlock* cbtemp;
 	AActor* actor;
 	ChunkMeshGenerator cmg;
 	ChunkBlockGen cbg;
