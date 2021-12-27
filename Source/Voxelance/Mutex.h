@@ -28,7 +28,7 @@ public:
 	{
 		Windows::LeaveCriticalSection(&m_criticalSection);
 	}
-	BOOL tryLock()
+	Windows::BOOL tryLock()
 	{
 		return Windows::TryEnterCriticalSection(&m_criticalSection);
 	}

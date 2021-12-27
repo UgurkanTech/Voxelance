@@ -44,6 +44,7 @@ static bool chunkContains(TArray<AChunkActor*> chunks, FVector v)
 }
 
 
+
 uint32 WorldWorker::Run()
 {
 	// Peform your processor intensive task here. In this example, a neverending
@@ -68,7 +69,7 @@ uint32 WorldWorker::Run()
 
 		//Find chunks
 		int size = 1600;
-		int range = 3;
+		int range = 7;
 		worldgen->chunksInRange.Reset(((range * 2) - 1) * ((range * 2) - 1));
 		worldgen->chunksInRange.Add(new FVector(size * ( ffloor(loc.X / size)), (ffloor(loc.Y / size)) * size, 0));
 		for (int r = 0; r < range; r++) {
@@ -82,37 +83,7 @@ uint32 WorldWorker::Run()
 				worldgen->chunksInRange.Add(new FVector(((r * -1) + ffloor(loc.X / size)) * size, (x + ffloor(loc.Y / size)) * size, 0));
 
 		}
-
 		
-		for (int i = 0; i < worldgen->chunksInRange.Num(); i++)
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("A chunk pos: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
-
-
-			if(!chunkContains(worldgen->chunks, *worldgen->chunksInRange[i]) && !worldgen->generateQueue.Contains(worldgen->chunksInRange[i]))
-			{
-				
-				worldgen->generateQueue.Push(worldgen->chunksInRange[i]);
-					
-				UE_LOG(LogTemp, Warning, TEXT("A chunk added to generateQueue: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
-				
-			}
-	
-		}
-		
-		//add ready chunks to render queue
-		for (size_t i = 0; i < worldgen->chunks.Num(); i++) {
-		
-			if (!worldgen->chunks[i]->dirty && !worldgen->RenderQueue.Contains(worldgen->chunks[i])) {
-				worldgen->chunks[i]->chunkWorker->Thread->WaitForCompletion();
-				worldgen->RenderQueue.Add(worldgen->chunks[i]);
-				worldgen->chunks[i]->dirty = true;
-				UE_LOG(LogTemp, Warning, TEXT("A chunk added to renderQueue: %d, new size %d"), i, worldgen->RenderQueue.Num());
-
-			}
-	
-
-		}
 		FPlatformProcess::Sleep(0.05f);
 		
 	}

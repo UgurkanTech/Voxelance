@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkActor.h"
+#include "ChunkBlock.h"
 #include "ChunkMeshGenerator.h"
 #include "ChunkBlockGen.h"
 #include "Mutex.h"
@@ -26,16 +27,12 @@ public:
 
 	UFUNCTION()
 		void SpawnChunk();
+	
+	TArray<FChunkBlock*> chunks;
 
-	//TArray<*AChunk> chunks;
-	UPROPERTY()
-	TArray<AChunkActor*> chunks;
-	UPROPERTY()
-	TArray<AChunkActor*> RenderQueue;
-	TArray<FVector*> generateQueue;
 	TArray<FVector*> chunksInRange;
 	
-
+	bool chunkContains(FVector* v);
 	Mutex mutex;
 	WorldWorker* ww;
 protected:

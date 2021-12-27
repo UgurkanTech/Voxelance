@@ -115,35 +115,65 @@ void AWorldGen::EndPlay(EEndPlayReason::Type type)
 
 }
 
+bool AWorldGen::chunkContains(FVector* v)
+{
+	for (int i = 0; i < chunks.Num(); i++)
+		if(chunks[i]->Pos.Equals(*v)) return true;
+	return false;
+}
+
+
 // Called every frame
 void AWorldGen::Tick(float DeltaTime)
 {
-	AChunkActor* tempActor;
-	FVector* tempVector;
-	if (RenderQueue.Num() > 0 && mutex.tryLock()) {
-		
-		tempActor = RenderQueue[0];
-		tempActor->mesh->CreateMeshSection(0, tempActor->vertices, tempActor->triangles, TArray<FVector>(), tempActor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-		RenderQueue.RemoveAt(0);
-		UE_LOG(LogTemp, Warning, TEXT("A chunk rendered at pos: %.0f %.0f %.0f "), tempActor->pos.X, tempActor->pos.Y, tempActor->pos.Z);
-		//chunks.Add(tempActor);
-		mutex.Unlock();
-	}
-
-
 	
-	if(generateQueue.Num() > 0 && mutex.tryLock())
+
+					
+	
+				
+	for (FVector* v : chunksInRange)
 	{
-		tempVector = generateQueue[0];
-		AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), *tempVector, FRotator(0,0,0), SpawnParams);
-		ch->pos = *tempVector;
-		ch->Start(&cmg, &cbg);
-		ch->dirty = false;
-		ch->rendered = true;
-		chunks.Add(ch);
-		generateQueue.RemoveAt(0);
-		mutex.Unlock();
+		if (!chunkContains(v))
+		{
+			chunks.Add(new FChunkBlock(v));
+		}
 	}
+	
+
+	for (FChunkBlock* c : chunks)
+	{
+		switch (c->State)
+		{
+		case Pooled:
+			{
+				AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), c->Pos, FRotator(0,0,0), SpawnParams);
+				ch->pos = c->Pos;
+				c->Actor = ch;
+				ch->Start(&cmg, &cbg);
+				c->State = Dirty;
+				UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+			}
+			break;
+		case Dirty:
+			{
+				if(!c->Actor->dirty)
+					c->State = ReadyToRender;
+			}
+			break;
+		case ReadyToRender:
+			{
+				c->Actor->mesh->CreateMeshSection(0, c->Actor->vertices, c->Actor->triangles, TArray<FVector>(), c->Actor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+				c->State = Rendered;
+				UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+			}
+			break;
+		case Rendered:
+			break;
+		}
+		
+		
+	}
+	
 
 }
 
