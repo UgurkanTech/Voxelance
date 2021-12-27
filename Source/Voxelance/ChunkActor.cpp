@@ -13,7 +13,7 @@ AChunkActor::AChunkActor()
 	//AmmoSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("AmmoSceneComponent"));
 	//RootComponent = AmmoSceneComponent;
 	//chunk = CreateDefaultSubobject<USceneComponent, UChunk>("Chunk Mesh", true);
-	
+	dirty = true;
 	//chunk.Rename(NULL, this);
 	
 	//chunk->SetupAttachment(RootComponent);
@@ -60,7 +60,7 @@ void AChunkActor::BeginPlay()
 void AChunkActor::EndPlay(EEndPlayReason::Type type)
 {
 	Super::EndPlay(type);
-	if(!chunkWorker->created)
+	if(chunkWorker != nullptr && dirty)
 		chunkWorker->Thread->Kill();
 	
 

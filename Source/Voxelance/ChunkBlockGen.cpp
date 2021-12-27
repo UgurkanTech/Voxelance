@@ -18,6 +18,19 @@ void ChunkBlockGen::generateBlocks(float x, float y, float z, FBlock* blocks) {
 	{
 
 				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 15 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 14 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 13 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 12 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 11 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 10 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 9 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 8 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 7 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 6 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 5 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 6 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 8 + 4;
+				n = (noise.GetNoise(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1)) + 1) * 15 + 4;
 
 				//float n = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(x + (i & xyMaxSub1), y + ((i >> 4) & xyMaxSub1),1.2f, 0.9f, 2, 2.4f, true) * 5 + 4;
 				

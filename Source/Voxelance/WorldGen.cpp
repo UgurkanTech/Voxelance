@@ -55,7 +55,7 @@ void AWorldGen::SpawnChunk()
 		for (size_t j = 0; j < 16; j++)
 		{
 			
-			spawnLocation = FVector(i * xyMax * triangleSize, j * xyMax * triangleSize, 0);
+			//spawnLocation = FVector(i * xyMax * triangleSize, j * xyMax * triangleSize, 0);
 
 			//actor = GetWorld()->SpawnActor<AActor>(chunkBP->GeneratedClass, spawnLocation, GetActorRotation(), SpawnParams);
 			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Invalid %s"), actor->IsActorInitialized()));
@@ -69,12 +69,10 @@ void AWorldGen::SpawnChunk()
 			//TSubclassOf<AChunkActor> ClassToCreate;
 			//auto FreshObject = NewObject<AChunkActor>(this, "asd", RF_NoFlags, ClassToCreate.GetDefaultObject());
 			//FreshObject->RegisterAllComponents();
-			AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), spawnLocation, FRotator(0,0,0), SpawnParams);
-			ch->id = i * j;
 			//FreshObject->RegisterComponentWithWorld(World);
-			ch->pos = spawnLocation;
-			ch->Start(&cmg, &cbg);
-			DirtyChunks.Add(ch);
+			//ch->id = i * j;
+			
+			
 			//UE_LOG(LogTemp, Warning, TEXT("Added thread: %.1f %.1f"), spawnLocation.X, spawnLocation.Y);
 
 			//ch->SetActorLocation(spawnLocation);
@@ -97,15 +95,76 @@ void AWorldGen::SpawnChunk()
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Total world gen time: % d"), t));
 	
 }
+class Mutex
+{
+public:
+	//the default constructor
+	Mutex()
+	{
+		InitializeCriticalSection(&m_criticalSection);
+	}
 
+	//destructor
+	~Mutex()
+	{
+		DeleteCriticalSection(&m_criticalSection);
+	}
+
+	//lock
+	void lock()
+	{
+		EnterCriticalSection(&m_criticalSection);
+	}
+
+	//unlock
+	void unlock()
+	{
+		LeaveCriticalSection(&m_criticalSection);
+	}
+
+private:
+	CRITICAL_SECTION m_criticalSection;
+};
+Mutex m;
+FVector* AWorldGen::GetSetGenerateQueue(int index, bool set, FVector* v)
+{
+	FVector* vec;
+	m.lock();
+	if (set)
+	{
+		generateQueue[index] = v;
+	}
+	else
+	{
+		 vec = generateQueue[index];
+	}
+	m.unlock();
+	return vec;
+}
+
+AChunkActor* AWorldGen::GetSetRenderQueue(int index, bool set, AChunkActor* v)
+{
+	AChunkActor* vec;
+	m.lock()
+	if (set)
+	{
+		RenderQueue[index] = v;
+	}
+	else
+	{
+		vec = RenderQueue[index];
+	}
+	m.unlock();
+	return vec;
+}
 
 // Called when the game starts or when spawned
 void AWorldGen::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnChunk();
-
-	ww = new WorldWorker(this);
+	if(ww == nullptr)
+		ww = new WorldWorker(this);
 }
 
 void AWorldGen::EndPlay(EEndPlayReason::Type type)
@@ -115,14 +174,31 @@ void AWorldGen::EndPlay(EEndPlayReason::Type type)
 	ww->Thread->Kill();
 
 }
-AChunkActor* tempActor;
+
 // Called every frame
 void AWorldGen::Tick(float DeltaTime)
 {
-	if (!generatedChunkToRender.IsEmpty()) {
-		generatedChunkToRender.Dequeue(tempActor);
+	AChunkActor* tempActor;
+	FVector* tempVector;
+	if (RenderQueue.Num() > 0) {
 		
+		tempActor = RenderQueue[0];
 		tempActor->mesh->CreateMeshSection(0, tempActor->vertices, tempActor->triangles, TArray<FVector>(), tempActor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+		RenderQueue.RemoveAt(0);
+		UE_LOG(LogTemp, Warning, TEXT("A chunk rendered at pos: %.0f %.0f %.0f "), tempActor->pos.X, tempActor->pos.Y, tempActor->pos.Z);
+		//chunks.Add(tempActor);
+	}
+
+
+	
+	if(generateQueue.Num() > 0)
+	{
+		tempVector = generateQueue[0];
+		AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), *tempVector, FRotator(0,0,0), SpawnParams);
+		ch->pos = *tempVector;
+		ch->Start(&cmg, &cbg);
+		chunks.Add(ch);
+		generateQueue.RemoveAt(0);
 	}
 
 }

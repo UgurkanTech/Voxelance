@@ -36,6 +36,14 @@ bool WorldWorker::Init()
 int inline ffloor(const float x) { return x < 0 ? (int)x == x ? (int)x : (int)x - 1 : (int)x; }
 
 
+static bool chunkContains(TArray<AChunkActor*> chunks, FVector v)
+{
+	for (int i = 0; i < chunks.Num(); i++)
+		if(chunks[i]->pos == v) return true;
+	return false;
+}
+
+
 uint32 WorldWorker::Run()
 {
 	// Peform your processor intensive task here. In this example, a neverending
@@ -45,7 +53,7 @@ uint32 WorldWorker::Run()
 	//UE_LOG(LogTemp, Warning, TEXT("worldworker running"));
 
 	APawn* pc = nullptr;
-	FVector loc;
+	FVector loc(0,0,0);
 	while (bRunThread){
 		if (pc == nullptr) {
 			pc = worldgen->GetWorld()->GetFirstPlayerController()->GetPawn();
@@ -59,28 +67,43 @@ uint32 WorldWorker::Run()
 		//UE_LOG(LogTemp, Warning, TEXT("Playerpos: %.1f %.1f %.1f"), loc.X, loc.Y, loc.Z);
 
 		//Find chunks
-		int size = 800;
-		int range = 4;
+		int size = 1600;
+		int range = 3;
 		worldgen->chunksInRange.Reset(((range * 2) - 1) * ((range * 2) - 1));
-		worldgen->chunksInRange.Add(new FVector((size * (0 + ffloor(loc[0] / size)), (0 + ffloor((loc[1] / size))) * size)));
+		worldgen->chunksInRange.Add(new FVector(size * ( ffloor(loc.X / size)), (ffloor(loc.Y / size)) * size, 0));
 		for (int r = 0; r < range; r++) {
 			for (int x = -r; x < r; x++)
-				worldgen->chunksInRange.Add(new FVector(((x + ffloor((loc[0] / size))) * size, (r + ffloor((loc[1] / size))) * size)));
-			for (int x = r; x > r; x--)
-				worldgen->chunksInRange.Add(new FVector(((r + ffloor((loc[0] / size))) * size, (x + ffloor((loc[1] / size))) * size)));
-			for (int x = r; x > r; x--)
-				worldgen->chunksInRange.Add(new FVector(((x + ffloor((loc[0] / size))) * size, (r * -1 + ffloor((loc[1] / size))) * size)));
+				worldgen->chunksInRange.Add(new FVector((x + ffloor(loc.X / size)) * size, (r + ffloor(loc.Y / size)) * size, 0));
+			for (int x = r; x > -r; x--)
+				worldgen->chunksInRange.Add(new FVector((r + ffloor(loc.X / size)) * size, (x + ffloor(loc.Y / size)) * size, 0));
+			for (int x = r; x > -r; x--)
+				worldgen->chunksInRange.Add(new FVector((x + ffloor(loc.X / size)) * size, ((r * -1) + ffloor(loc.Y / size)) * size, 0));
 			for (int x = -r; x < r; x++)
-				worldgen->chunksInRange.Add(new FVector(((r * -1 + ffloor((loc[0] / size))) * size, (x + ffloor((loc[1] / size))) * size)));
+				worldgen->chunksInRange.Add(new FVector(((r * -1) + ffloor(loc.X / size)) * size, (x + ffloor(loc.Y / size)) * size, 0));
+
 		}
 
+		
+		for (int i = 0; i < worldgen->chunksInRange.Num(); i++)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("A chunk pos: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
+				
+			if(!chunkContains(worldgen->chunks, *worldgen->chunksInRange[i]) && !worldgen->generateQueue.Contains(worldgen->chunksInRange[i]))
+			{
+				
+				worldgen->generateQueue.Push(worldgen->chunksInRange[i]);
+				//UE_LOG(LogTemp, Warning, TEXT("A chunk pos added: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
+				
+			}
+				
+		}
+		
 		//add ready chunks to render queue
-		for (size_t i = 0; i < worldgen->DirtyChunks.Num(); i++) {
+		for (size_t i = 0; i < worldgen->chunks.Num(); i++) {
 
-			if (worldgen->DirtyChunks[i]->chunkWorker->created) {
-				worldgen->DirtyChunks[i]->chunkWorker->Thread->WaitForCompletion();
-				worldgen->generatedChunkToRender.Enqueue(worldgen->DirtyChunks[i]);
-				worldgen->DirtyChunks.RemoveAt(i);
+			if (!worldgen->chunks[i]->dirty && !worldgen->RenderQueue.Contains(worldgen->chunks[i])) {
+				worldgen->chunks[i]->chunkWorker->Thread->WaitForCompletion();
+				worldgen->RenderQueue.Add(worldgen->chunks[i]);
 				//UE_LOG(LogTemp, Warning, TEXT("chunk removed: %d, new size %d"), i, worldgen->generatingChunks.Num());
 				//i--;
 				//break;
@@ -88,6 +111,7 @@ uint32 WorldWorker::Run()
 
 		}
 		FPlatformProcess::Sleep(0.05f);
+		
 	}
 
 	return 0;

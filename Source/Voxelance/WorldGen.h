@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <wrl/wrappers/corewrappers.h>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkActor.h"
@@ -9,6 +11,7 @@
 #include "ChunkBlockGen.h"
 #include "Containers/Queue.h"
 #include "WorldWorker.h"
+#include "VulkanRHI/Public/VulkanMemory.h"
 #include "WorldGen.generated.h"
 
 class WorldWorker;
@@ -25,11 +28,16 @@ public:
 		void SpawnChunk();
 
 	//TArray<*AChunk> chunks;
-	TMap<FVector, AChunkActor*> chunks;
-	TArray<AChunkActor*> DirtyChunks;
-	TQueue<AChunkActor*, EQueueMode::Mpsc> generatedChunkToRender;
+	UPROPERTY()
+	TArray<AChunkActor*> chunks;
+	UPROPERTY()
+	TArray<AChunkActor*> RenderQueue;
+	TArray<FVector*> generateQueue;
 	TArray<FVector*> chunksInRange;
-
+	
+	FVector* GetSetGenerateQueue(int index, bool set = false, FVector* v = nullptr);
+	AChunkActor* GetSetRenderQueue(int index, bool set = false, AChunkActor* v = nullptr);
+	FScopeLock lock;
 	WorldWorker* ww;
 protected:
 	// Called when the game starts or when spawned
@@ -43,7 +51,7 @@ private:
 	UBlueprint* chunkBP;
 	UWorld* World;
 	FActorSpawnParameters SpawnParams;
-	FVector spawnLocation;
+	
 	AActor* actor;
 	ChunkMeshGenerator cmg;
 	ChunkBlockGen cbg;

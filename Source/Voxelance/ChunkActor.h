@@ -37,13 +37,16 @@ public:
 	void Start(ChunkMeshGenerator* cmg, ChunkBlockGen* cbg);
 	FVector pos;
 	int id;
-
+	bool dirty;
 	TArray<FVector> vertices;
 	TArray<int32> triangles;
 	TArray<FVector2D> UVs;
+	UPROPERTY()
 	UProceduralMeshComponent* mesh;
+	UPROPERTY()
 	UMaterial* StoredMaterial;
 	ChunkWorker* chunkWorker;
+	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterialInst;
 	FBlock blocks[blockCount];
 
@@ -51,6 +54,7 @@ public:
 	{
 		return pos.X == a.pos.X && pos.Y == a.pos.Y && pos.Z == a.pos.Z;
 	}
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -22,7 +22,6 @@ public:
 	bool Init() override; // Do your setup here, allocate memory, ect.
 	uint32 Run() override; // Main data processing happens here
 	void Stop() override; // Clean up any memory you allocated here
-	bool created;
 	AChunkActor* actor;
 	ChunkBlockGen* cbg;
 	ChunkMeshGenerator* cmg;
