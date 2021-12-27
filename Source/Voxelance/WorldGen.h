@@ -9,9 +9,9 @@
 #include "ChunkActor.h"
 #include "ChunkMeshGenerator.h"
 #include "ChunkBlockGen.h"
+#include "Mutex.h"
 #include "Containers/Queue.h"
 #include "WorldWorker.h"
-#include "VulkanRHI/Public/VulkanMemory.h"
 #include "WorldGen.generated.h"
 
 class WorldWorker;
@@ -35,9 +35,8 @@ public:
 	TArray<FVector*> generateQueue;
 	TArray<FVector*> chunksInRange;
 	
-	FVector* GetSetGenerateQueue(int index, bool set = false, FVector* v = nullptr);
-	AChunkActor* GetSetRenderQueue(int index, bool set = false, AChunkActor* v = nullptr);
-	FScopeLock lock;
+
+	Mutex mutex;
 	WorldWorker* ww;
 protected:
 	// Called when the game starts or when spawned

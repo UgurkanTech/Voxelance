@@ -87,27 +87,30 @@ uint32 WorldWorker::Run()
 		for (int i = 0; i < worldgen->chunksInRange.Num(); i++)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("A chunk pos: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
-				
+
+
 			if(!chunkContains(worldgen->chunks, *worldgen->chunksInRange[i]) && !worldgen->generateQueue.Contains(worldgen->chunksInRange[i]))
 			{
 				
 				worldgen->generateQueue.Push(worldgen->chunksInRange[i]);
-				//UE_LOG(LogTemp, Warning, TEXT("A chunk pos added: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
+					
+				UE_LOG(LogTemp, Warning, TEXT("A chunk added to generateQueue: %.0f %.0f %.0f"), worldgen->chunksInRange[i]->X, worldgen->chunksInRange[i]->Y, worldgen->chunksInRange[i]->Z);
 				
 			}
-				
+	
 		}
 		
 		//add ready chunks to render queue
 		for (size_t i = 0; i < worldgen->chunks.Num(); i++) {
-
+		
 			if (!worldgen->chunks[i]->dirty && !worldgen->RenderQueue.Contains(worldgen->chunks[i])) {
 				worldgen->chunks[i]->chunkWorker->Thread->WaitForCompletion();
 				worldgen->RenderQueue.Add(worldgen->chunks[i]);
-				//UE_LOG(LogTemp, Warning, TEXT("chunk removed: %d, new size %d"), i, worldgen->generatingChunks.Num());
-				//i--;
-				//break;
+				worldgen->chunks[i]->dirty = true;
+				UE_LOG(LogTemp, Warning, TEXT("A chunk added to renderQueue: %d, new size %d"), i, worldgen->RenderQueue.Num());
+
 			}
+	
 
 		}
 		FPlatformProcess::Sleep(0.05f);

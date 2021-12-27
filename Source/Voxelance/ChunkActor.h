@@ -38,6 +38,7 @@ public:
 	FVector pos;
 	int id;
 	bool dirty;
+	bool rendered;
 	TArray<FVector> vertices;
 	TArray<int32> triangles;
 	TArray<FVector2D> UVs;

@@ -14,6 +14,7 @@ AChunkActor::AChunkActor()
 	//RootComponent = AmmoSceneComponent;
 	//chunk = CreateDefaultSubobject<USceneComponent, UChunk>("Chunk Mesh", true);
 	dirty = true;
+	rendered = false; 
 	//chunk.Rename(NULL, this);
 	
 	//chunk->SetupAttachment(RootComponent);

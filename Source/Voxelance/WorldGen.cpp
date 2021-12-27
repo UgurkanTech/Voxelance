@@ -95,68 +95,8 @@ void AWorldGen::SpawnChunk()
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Total world gen time: % d"), t));
 	
 }
-class Mutex
-{
-public:
-	//the default constructor
-	Mutex()
-	{
-		InitializeCriticalSection(&m_criticalSection);
-	}
 
-	//destructor
-	~Mutex()
-	{
-		DeleteCriticalSection(&m_criticalSection);
-	}
 
-	//lock
-	void lock()
-	{
-		EnterCriticalSection(&m_criticalSection);
-	}
-
-	//unlock
-	void unlock()
-	{
-		LeaveCriticalSection(&m_criticalSection);
-	}
-
-private:
-	CRITICAL_SECTION m_criticalSection;
-};
-Mutex m;
-FVector* AWorldGen::GetSetGenerateQueue(int index, bool set, FVector* v)
-{
-	FVector* vec;
-	m.lock();
-	if (set)
-	{
-		generateQueue[index] = v;
-	}
-	else
-	{
-		 vec = generateQueue[index];
-	}
-	m.unlock();
-	return vec;
-}
-
-AChunkActor* AWorldGen::GetSetRenderQueue(int index, bool set, AChunkActor* v)
-{
-	AChunkActor* vec;
-	m.lock()
-	if (set)
-	{
-		RenderQueue[index] = v;
-	}
-	else
-	{
-		vec = RenderQueue[index];
-	}
-	m.unlock();
-	return vec;
-}
 
 // Called when the game starts or when spawned
 void AWorldGen::BeginPlay()
@@ -180,25 +120,29 @@ void AWorldGen::Tick(float DeltaTime)
 {
 	AChunkActor* tempActor;
 	FVector* tempVector;
-	if (RenderQueue.Num() > 0) {
+	if (RenderQueue.Num() > 0 && mutex.tryLock()) {
 		
 		tempActor = RenderQueue[0];
 		tempActor->mesh->CreateMeshSection(0, tempActor->vertices, tempActor->triangles, TArray<FVector>(), tempActor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 		RenderQueue.RemoveAt(0);
 		UE_LOG(LogTemp, Warning, TEXT("A chunk rendered at pos: %.0f %.0f %.0f "), tempActor->pos.X, tempActor->pos.Y, tempActor->pos.Z);
 		//chunks.Add(tempActor);
+		mutex.Unlock();
 	}
 
 
 	
-	if(generateQueue.Num() > 0)
+	if(generateQueue.Num() > 0 && mutex.tryLock())
 	{
 		tempVector = generateQueue[0];
 		AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), *tempVector, FRotator(0,0,0), SpawnParams);
 		ch->pos = *tempVector;
 		ch->Start(&cmg, &cbg);
+		ch->dirty = false;
+		ch->rendered = true;
 		chunks.Add(ch);
 		generateQueue.RemoveAt(0);
+		mutex.Unlock();
 	}
 
 }
