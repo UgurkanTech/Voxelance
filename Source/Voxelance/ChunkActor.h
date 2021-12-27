@@ -38,7 +38,6 @@ public:
 	FVector pos;
 	int id;
 	bool dirty;
-	bool rendered;
 	TArray<FVector> vertices;
 	TArray<int32> triangles;
 	TArray<FVector2D> UVs;
@@ -50,7 +49,7 @@ public:
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterialInst;
 	FBlock blocks[blockCount];
-
+	
 	bool operator==(const AChunkActor& a) const
 	{
 		return pos.X == a.pos.X && pos.Y == a.pos.Y && pos.Z == a.pos.Z;

@@ -96,8 +96,6 @@ void ChunkMeshGenerator::generateMesh(FBlock* blocks3d, TArray<FVector>& vertice
     FVector2D uv3(1 / tileSize, 1 / tileSize);
     FVector tempVector;
     size_t a;
-
-
     
     for (size_t i = 0; i < blockCount; i++)
     {

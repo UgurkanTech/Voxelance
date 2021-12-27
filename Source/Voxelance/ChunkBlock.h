@@ -8,12 +8,16 @@ enum EChunkState
 	Pooled,
 	Dirty,
 	ReadyToRender,
-	Rendered
+	Rendered,
+	ToBeDeleted,
+	Deleted
 	
 };
 struct FChunkBlock
 {
+	
 	FChunkBlock(){}
+	
 	FChunkBlock(AChunkActor* actor)
 	{
 		this->Actor = actor;
@@ -23,6 +27,15 @@ struct FChunkBlock
 	{
 		this->Pos = *pos;
 	}
+	~FChunkBlock()
+	{
+
+		delete &Pos;
+		delete &mutex;
+		delete &State;
+		delete this;
+	}
+	
 	FVector Pos;
 	AChunkActor* Actor = nullptr;
 	Mutex mutex;

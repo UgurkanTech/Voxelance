@@ -29,7 +29,7 @@ public:
 		void SpawnChunk();
 	
 	TArray<FChunkBlock*> chunks;
-
+	TQueue<AChunkActor*> chunkActorPool;
 	TArray<FVector*> chunksInRange;
 	
 	bool chunkContains(FVector* v);

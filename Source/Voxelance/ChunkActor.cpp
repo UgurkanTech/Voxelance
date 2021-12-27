@@ -14,7 +14,7 @@ AChunkActor::AChunkActor()
 	//RootComponent = AmmoSceneComponent;
 	//chunk = CreateDefaultSubobject<USceneComponent, UChunk>("Chunk Mesh", true);
 	dirty = true;
-	rendered = false; 
+	
 	//chunk.Rename(NULL, this);
 	
 	//chunk->SetupAttachment(RootComponent);
@@ -51,6 +51,7 @@ AChunkActor::AChunkActor()
 	
 }
 
+
 // Called when the game starts or when spawned
 void AChunkActor::BeginPlay()
 {
@@ -77,7 +78,9 @@ void AChunkActor::Start(ChunkMeshGenerator* cmg, ChunkBlockGen* cbg) {
 	//UE_LOG(LogTemp, Error, TEXT("Chunkactor loc %.1f %.1f %.1f"), pos.X, pos.Y, pos.Z);
 	//uc->SetRelativeLocation(pos);
 	//ac->RegisterComponent();
-
+	vertices.Empty();
+	triangles.Empty();
+	UVs.Empty();
 	cbg->noise.SetSeed(132);
 	//cbg.noise.SetSeed(time(NULL));
 	

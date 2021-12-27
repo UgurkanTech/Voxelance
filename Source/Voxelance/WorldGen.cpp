@@ -126,54 +126,79 @@ bool AWorldGen::chunkContains(FVector* v)
 // Called every frame
 void AWorldGen::Tick(float DeltaTime)
 {
-	
-
-					
-	
+	if (mutex.tryLock())
+	{
+		for (FVector* v : chunksInRange)
+		{
+			if (!chunkContains(v))
+			{
+				chunks.Add(new FChunkBlock(v));
+			}
+		}
+		bool done = false;
+		for (FChunkBlock* c : chunks)
+		{
+		
+			switch (c->State)
+			{
+			case Pooled:
+				{
+					AChunkActor* ch;
+					if(chunkActorPool.IsEmpty())
+						 ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), c->Pos, FRotator(0,0,0), SpawnParams);
+					else
+					{
+						chunkActorPool.Dequeue(ch);
+						ch->dirty = true;
+					}
+						
+					ch->pos = c->Pos;
+					ch->SetActorLocation(c->Pos);
+					c->Actor = ch;
+					ch->Start(&cmg, &cbg);
+					c->State = Dirty;
+					UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					done = true;
+				}
+				break;
+			case Dirty:
+				{
+					if(!c->Actor->dirty)
+						c->State = ReadyToRender;
+				}
+				break;
+			case ReadyToRender:
+				{
+					c->Actor->mesh->CreateMeshSection(0, c->Actor->vertices, c->Actor->triangles, TArray<FVector>(), c->Actor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+					c->State = Rendered;
+					UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					done = true;
+				}
+				break;
+			case Rendered:
+				{
 				
-	for (FVector* v : chunksInRange)
-	{
-		if (!chunkContains(v))
-		{
-			chunks.Add(new FChunkBlock(v));
-		}
-	}
-	
+				}
+				break;
+			case ToBeDeleted:
+				{
+					c->Actor->mesh->ClearAllMeshSections();
+					c->State = Deleted;
+					chunkActorPool.Enqueue(c->Actor);
+					chunks.Remove(c);
+					UE_LOG(LogTemp, Warning, TEXT("A chunk Deleted: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
+					done = true;
+				}
+				break;
+			}
+		
+			
 
-	for (FChunkBlock* c : chunks)
-	{
-		switch (c->State)
-		{
-		case Pooled:
-			{
-				AChunkActor* ch = World->SpawnActor<AChunkActor>(AChunkActor::StaticClass(), c->Pos, FRotator(0,0,0), SpawnParams);
-				ch->pos = c->Pos;
-				c->Actor = ch;
-				ch->Start(&cmg, &cbg);
-				c->State = Dirty;
-				UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
-			}
-			break;
-		case Dirty:
-			{
-				if(!c->Actor->dirty)
-					c->State = ReadyToRender;
-			}
-			break;
-		case ReadyToRender:
-			{
-				c->Actor->mesh->CreateMeshSection(0, c->Actor->vertices, c->Actor->triangles, TArray<FVector>(), c->Actor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-				c->State = Rendered;
-				UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
-			}
-			break;
-		case Rendered:
-			break;
+			if(done)
+				break;
 		}
-		
-		
+		mutex.Unlock();
 	}
-	
 
 }
 

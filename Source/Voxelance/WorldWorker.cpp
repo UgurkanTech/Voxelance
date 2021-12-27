@@ -83,8 +83,20 @@ uint32 WorldWorker::Run()
 				worldgen->chunksInRange.Add(new FVector(((r * -1) + ffloor(loc.X / size)) * size, (x + ffloor(loc.Y / size)) * size, 0));
 
 		}
+
+		for (FChunkBlock* c : worldgen->chunks)
+		{
+			if (FVector::Distance(c->Pos, FVector(loc.X, loc.Y, 0)) > sqrt(range * size * range * size + range * size * range * size) && c->State == Rendered)
+			{
+				worldgen->mutex.Lock();
+				c->State = ToBeDeleted;
+				worldgen->mutex.Unlock();
+			}
+			
+		}
 		
-		FPlatformProcess::Sleep(0.05f);
+		
+		FPlatformProcess::Sleep(0.25f);
 		
 	}
 
