@@ -7,7 +7,7 @@
 #include "Block.generated.h"
 
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, Blueprintable)
 struct FBlock
 {
     GENERATED_BODY()
@@ -19,8 +19,11 @@ public:
         this->isOpaque = isOpaque;
 
     };
+    UPROPERTY(BlueprintReadWrite)
         uint8  id;
+    UPROPERTY(BlueprintReadWrite)
         uint8  meta;
+    UPROPERTY(BlueprintReadWrite)
         bool isOpaque;
 };
 

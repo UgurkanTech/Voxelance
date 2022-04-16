@@ -36,6 +36,9 @@ public:
 	bool chunkContains(FVector* v);
 	Mutex mutex;
 	WorldWorker* ww;
+	static ChunkMeshGenerator* cmg;
+	static ChunkBlockGen* cbg;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -52,6 +55,5 @@ private:
 	bool done;
 	FChunkBlock* cbtemp;
 	AActor* actor;
-	ChunkMeshGenerator cmg;
-	ChunkBlockGen cbg;
+	
 };

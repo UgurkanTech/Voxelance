@@ -58,6 +58,7 @@ uint32 WorldWorker::Run()
 
 	int size = xyMax * triangleSize * 2;
 	int range = 7;
+	int deleteRange = range + 3;
 	
 	while (bRunThread){
 		if (pc == nullptr) {
@@ -89,7 +90,7 @@ uint32 WorldWorker::Run()
 
 		for (FChunkBlock* c : worldgen->chunks)
 		{
-			if (FVector::Distance(c->Pos, FVector(loc.X, loc.Y, 0)) > sqrt(range * size * range * size + range * size * range * size) && c->State == Rendered)
+			if (FVector::Distance(c->Pos, FVector(loc.X, loc.Y, 0)) > sqrt((deleteRange * size * deleteRange * size) + (deleteRange * size * deleteRange * size)) && c->State == Rendered)
 			{
 				worldgen->mutex.Lock();
 				c->State = ToBeDeleted;

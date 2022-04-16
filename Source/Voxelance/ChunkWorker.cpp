@@ -73,3 +73,9 @@ void ChunkWorker::Stop()
 	// It will finish in <= 1 sec, due to the Sleep()
 	bRunThread = false;
 }
+
+void ChunkWorker::Regenerate()
+{
+	cmg->generateMesh(actor->blocks, actor->vertices, actor->triangles, actor->UVs);
+	//actor->chunkBlock->State = ReadyToRender;
+}

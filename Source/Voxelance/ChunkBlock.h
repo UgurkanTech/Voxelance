@@ -2,7 +2,10 @@
 #include "ChunkActor.h"
 #include "Mutex.h"
 #include "Misc/Crc.h"
+#include "ChunkBlock.generated.h"
 
+class AChunkActor;
+UENUM()
 enum EChunkState
 {
 	Pooled,
@@ -13,15 +16,15 @@ enum EChunkState
 	Deleted
 	
 };
+USTRUCT()
 struct FChunkBlock
 {
-	
+	GENERATED_BODY()
 	FChunkBlock(){}
 	
 	FChunkBlock(AChunkActor* actor)
 	{
 		this->Actor = actor;
-		this->Pos = actor->pos;
 	}
 	FChunkBlock(FVector* pos)
 	{
@@ -35,12 +38,14 @@ struct FChunkBlock
 		delete &State;
 		delete this;
 	}
-	
+	UPROPERTY()
 	FVector Pos;
-	AChunkActor* Actor = nullptr;
+	
+	//TSharedPtr<AChunkActor> Actor;
+	AChunkActor* Actor;
 	Mutex mutex;
-
-	EChunkState State = Pooled;
+	UPROPERTY()
+	TEnumAsByte<EChunkState> State = Pooled;
 	
 	bool operator==(const FChunkBlock& Other) const
 	{

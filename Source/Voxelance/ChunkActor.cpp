@@ -3,6 +3,7 @@
 
 #include "ChunkActor.h"
 
+#include "WorldGen.h"
 
 
 // Sets default values
@@ -48,9 +49,26 @@ AChunkActor::AChunkActor()
 	mesh->SetMaterial(0, StoredMaterial);
 
 	RootComponent = Cast<USceneComponent>(mesh);
+
+	bReplicates = true;
 	
 }
 
+
+FBlock AChunkActor::getBlock(int x, int y, int z)
+{
+	return blocks[(z * xyMax2) + (y * xyMax) + x];
+}
+
+void AChunkActor::setBlock_Implementation(int x, int y, int z, FBlock block)
+{
+	blocks[(z * xyMax2) + (y * xyMax) + x] = block;
+	vertices.Empty();
+	triangles.Empty();
+	UVs.Empty();
+	chunkWorker->Regenerate();
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Block replicated! %d %d"), x, y));
+}
 
 // Called when the game starts or when spawned
 void AChunkActor::BeginPlay()
@@ -80,14 +98,11 @@ void AChunkActor::Start(ChunkMeshGenerator* cmg, ChunkBlockGen* cbg) {
 	//ac->RegisterComponent();
 
 	cbg->noise.SetSeed(132);
-	
+
+
 	vertices.Empty();
 	triangles.Empty();
 	UVs.Empty();
-
-	vertices.Shrink();
-	triangles.Shrink();
-	UVs.Shrink();
 	
 	//cbg.noise.SetSeed(time(NULL));
 	

@@ -9,6 +9,8 @@
 #include "ChunkMeshGenerator.h"
 #include "ChunkBlockGen.h"
 #include <Thread>
+
+//#include "ChunkBlock.h"
 #include "ChunkWorker.h"
 #include "ChunkActor.generated.h"
 
@@ -22,11 +24,12 @@ using namespace std;
 #define tileSize 4.0f
 #define triangleSize 50
 
-
 class ChunkMeshGenerator;
 class ChunkBlockGen;
 class ChunkWorker;
-UCLASS()
+//struct FChunkBlock;
+
+UCLASS(BlueprintType, Blueprintable)
 class VOXELANCE_API AChunkActor : public AActor
 {
 	GENERATED_BODY()
@@ -55,11 +58,18 @@ public:
 	UPROPERTY()
 	FBlock blocks[blockCount];
 	
+	//FChunkBlock* chunkBlock;
+	//TSharedPtr<FChunkBlock> chunkBlock;
 	bool operator==(const AChunkActor& a) const
 	{
 		return pos.X == a.pos.X && pos.Y == a.pos.Y && pos.Z == a.pos.Z;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	FBlock getBlock(int x, int y, int z);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void setBlock(int x, int y, int z, FBlock block);
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

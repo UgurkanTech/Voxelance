@@ -3,6 +3,10 @@
 
 #include "WorldGen.h"
 
+
+ChunkMeshGenerator* AWorldGen::cmg = new ChunkMeshGenerator();
+ChunkBlockGen* AWorldGen::cbg = new ChunkBlockGen();
+
 // Sets default values
 AWorldGen::AWorldGen()
 {
@@ -50,10 +54,10 @@ void AWorldGen::SpawnChunk()
 	UtilityTimer timer;
 	int32 t = 0;
 	timer.tick();
-	for (size_t i = 0; i < 16; i++)
+	for (size_t i = 0; i < 2; i++)
 	{
 		
-		for (size_t j = 0; j < 16; j++)
+		for (size_t j = 0; j < 2; j++)
 		{
 			
 			//spawnLocation = FVector(i * xyMax * triangleSize, j * xyMax * triangleSize, 0);
@@ -163,8 +167,9 @@ void AWorldGen::Tick(float DeltaTime)
 					ch->pos = c->Pos;
 					ch->SetActorLocation(c->Pos);
 					c->Actor = ch;
-					ch->Start(&cmg, &cbg);
+					ch->Start(cmg, cbg);
 					c->State = Dirty;
+					//ch->chunkBlock = c;
 					//UE_LOG(LogTemp, Warning, TEXT("A chunk Dirty: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
 					done = true;
 				}
@@ -180,7 +185,7 @@ void AWorldGen::Tick(float DeltaTime)
 					c->Actor->mesh->CreateMeshSection(0, c->Actor->vertices, c->Actor->triangles, TArray<FVector>(), c->Actor->UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 					c->State = Rendered;
 					//UE_LOG(LogTemp, Warning, TEXT("A chunk Rendered: %.0f %.0f %.0f"), c->Pos.X, c->Pos.Y, c->Pos.Z);
-					done = true;
+					//done = true;
 				}
 				break;
 			case Rendered:
@@ -207,7 +212,7 @@ void AWorldGen::Tick(float DeltaTime)
 		}
 		mutex.Unlock();
 	}
-	
+	//SetActorLocation(GetActorLocation() + FVector(5000,0,0) * DeltaTime);
 
 }
 
